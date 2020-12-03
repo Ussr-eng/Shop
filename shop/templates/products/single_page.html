@@ -1,0 +1,103 @@
+{% extends "layout.html" %}
+
+{% block content %}
+{% include '_messages.html' %}
+{% include 'navbar2.html' %}
+
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-md-6" id="b_image">
+            <img src="{{url_for('static', filename='images/' + product.image_1)}}" alt="{{product.name}}" width="400" height="400">
+
+        </div>
+        <div class="col-md-6">
+            <h4>{{ product.name }}</h4>
+            <hr>
+            <p>Цена: {{ product.price }} ₴</p>
+            {% if product.discount > 0 %}
+            <p>{{ product.discount }} %</p>
+            {% endif %}
+            <b>Описание Продукта</b>
+            <p>{{ product.desc }}</p>
+            <form action="{{url_for('AddCart')}}" method="POST">
+                <input type="hidden" name="product_id" value="{{product.id}}">
+                <button type="submit" class="btn btn-sm btn-warning ">Добавить в корзину</button>
+                <label for="" class="mt-5">количество:</label>
+                <input type="number" name="quantity" id="" value="1" min="1" max="{{product.stock}}">
+            </form>
+            <button type="button" class="btn btn-sm btn-success mt-2"  data-toggle="modal" data-target="#exampleModalLong-{{product.id}}">Купить в один клик!</button>
+        </div>
+    </div>
+
+
+
+    <div class="modal fade" id="exampleModalLong-{{product.id}}" tabindex="-1" role="dialog" aria-labelledby="exampleModalLongTitle" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLongTitle">Купить в один клик</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+
+           <span class="text-danger">{{product.name}}</span>
+
+        <form action="{{url_for('orderoneclick', id=product.id)}}" method="POST">
+          <div class="form-group">
+            <label for="recipient-name" class="col-form-label">Как Вас зовут:</label>
+            <input type="text" name="name" class="form-control" id="recipient-name"  maxlength="20">
+              <small id="passwordHelpBlock" class="form-text text-muted" >
+              например: Андрей.
+                </small>
+          </div>
+          <div class="form-group">
+            <label for="message-text" class="col-form-label">Ваш номер телефона:</label>
+            <input type="text" name="number" class="form-control" id="message-text" maxlength="10">
+              <small id="passwordHelpBlock" class="form-text text-muted" >
+              Ваша запись должна иметь строго следующий вид: 0961111111, 0632222222;
+                  максимальное количество символов - 10.
+                </small>
+          </div>
+            <div class="modal-footer">
+
+            <button type="submit" class="btn btn-danger btn-sm">Отправить заявку</button>
+
+
+      </div>
+        </form>
+        </div>
+    </div>
+  </div>
+</div>
+
+
+
+    <div class="row">
+        <div class="col-md-12 mt-3" id="s_image">
+            <img src="{{url_for('static', filename='images/' + product.image_1)}}" alt="{{product.name}}"
+                 width="120" height="120" class="p-3">
+            <img src="{{url_for('static', filename='images/' + product.image_2)}}" alt="{{product.name}}"
+                 width="120" height="120" class="p-3">
+            <img src="{{url_for('static', filename='images/' + product.image_3)}}" alt="{{product.name}}"
+                 width="120" height="120" class="p-3">
+        </div>
+
+    </div>
+</div>
+
+<script>
+    var b_image = document.getElementById('b_image');
+    var s_image = document.getElementById('s_image').getElementsByTagName('img');
+    for(var i = 0; i < s_image.length; i++){
+        s_image[i].addEventListener('click' , full_image);
+    }
+
+    function full_image() {
+        var ImageSRC = this.getAttribute('src');
+        b_image.innerHTML = "<img src=" + ImageSRC + " width='400' height='400'>";
+    }
+</script>
+
+{% endblock content %}

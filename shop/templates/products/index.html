@@ -1,0 +1,196 @@
+{% extends "layout.html" %}
+
+{% block content %}
+{% include '_messages.html' %}
+{% include 'navbar2.html' %}
+
+
+<div class="container">
+    <div class="row">
+{% if brand %}
+        {% for b in brand.items %}
+
+         <div class="col-md-3 mt-5">
+                <div class="product-grid">
+                    <div class="image">
+                        <img src="{{url_for('static', filename='images/' + b.image_1)}}" alt="{{b.name}}" class="w-100"
+                        width="200">
+                        <a href="{{url_for('single_page', id=b.id)}}">
+                            <div class="overlay">
+                                <div class="detail">Описание</div>
+                            </div>
+                        </a>
+                    </div>
+                <div class="text-center mt-3">
+                    {% if b.discount > 0 %}
+                    <p>скидка {{ b.discount}} %</p>
+                    {% endif %}
+                    <h5 class="text-center">{{b.name}}</h5>
+                    <p class="text-center">Цена {{b.price}} ₴</p>
+                </div>
+                    <form action="{{url_for('AddCart')}}" method="POST">
+                    <input type="hidden" name="product_id" value="{{b.id}}">
+                    <div class="flex">
+                    <button type="submit" class="btn btn-outline-primary">В корзину</button>
+                    </div>
+                    <input type="hidden" name="quantity" id="" value="1" >
+                    </form>
+                </div>
+            </div>
+
+        {% endfor %}
+    </div>
+
+
+
+<div class="row">
+        <div  class="col text-center ">
+            {% if brand.has_prev %}
+            <a href="{{url_for('get_brand', id=get_cat.id, page=brand.prev_num)}}" class="btn btn-outline-info btn-sm mt-3">Предыдущая</a>
+            {% endif %}
+            {% if brand.total > 8  %}
+            {% for page_num in brand.iter_pages(left_edge=1, right_edge=2, left_current=1, right_current=2) %}
+            {% if page_num %}
+            {% if brand.page == page_num %}
+            <a href="{{url_for('get_brand', id=get_b.id, page=page_num)}}" class="btn btn-info btn-sm mt-3">{{page_num}}</a>
+            {% else %}
+            <a href="{{url_for('get_brand', id=get_b.id,  page=page_num)}}" class="btn btn-outline-info btn-sm mt-3">{{page_num}}</a>
+            {% endif %}
+            {% else %}
+            ...
+            {% endif %}
+            {% endfor %}
+            {% endif %}
+            {% if brand.has_next %}
+            <a href="{{url_for('get_brand', id=get_cat.id, page=brand.next_num)}}" class="btn btn-outline-info btn-sm mt-3">Cледующая</a>
+            {% endif %}
+        </div>
+    </div>
+
+</div>
+
+<div class="row">
+
+{% elif get_cat_prod %}
+{% for prod in get_cat_prod.items %}
+
+            <div class="col-md-3 mt-5">
+                <div class="product-grid">
+                    <div class="image">
+                        <img src="{{url_for('static', filename='images/' + prod.image_1)}}" alt="{{prod.name}}" class="w-100"
+                        width="200">
+                        <a href="{{url_for('single_page', id=prod.id)}}">
+                            <div class="overlay">
+                                <div class="detail">Описание</div>
+                            </div>
+                        </a>
+                    </div>
+                <div class="text-center mt-3">
+                        {% if prod.discount > 0 %}
+                        <p>скидка {{ prod.discount}} %</p>
+                        {% endif %}
+                <h5 class="text-center">{{prod.name}}</h5>
+                <p class="text-center">Цена {{prod.price}} ₴</p>
+                </div>
+                    <form action="{{url_for('AddCart')}}" method="POST">
+                        <input type="hidden" name="product_id" value="{{prod.id}}">
+                        <div class="flex">
+                        <button type="submit" class="btn btn-outline-primary" >В корзину</button>
+                        </div>
+                        <input type="hidden" name="quantity" id="" value="1">
+                    </form>
+                </div>
+            </div>
+
+        {% endfor %}
+    </div>
+
+    <div class="row">
+        <div  class="col text-center ">
+            {% if get_cat_prod.has_prev %}
+            <a href="{{url_for('get_category', id=get_cat.id, page=get_cat_prod.prev_num)}}" class="btn btn-outline-info btn-sm mt-3">Предыдущая</a>
+            {% endif %}
+            {% if get_cat_prod.total > 8  %}
+            {% for page_num in get_cat_prod.iter_pages(left_edge=1, right_edge=2, left_current=1, right_current=2) %}
+            {% if page_num %}
+            {% if get_cat_prod.page == page_num %}
+            <a href="{{url_for('get_category', id=get_cat.id, page=page_num)}}" class="btn btn-info btn-sm mt-3">{{page_num}}</a>
+            {% else %}
+            <a href="{{url_for('get_category', id=get_cat.id,  page=page_num)}}" class="btn btn-outline-info btn-sm mt-3">{{page_num}}</a>
+            {% endif %}
+            {% else %}
+            ...
+            {% endif %}
+            {% endfor %}
+            {% endif %}
+            {% if get_cat_prod.has_next %}
+            <a href="{{url_for('get_category', id=get_cat.id, page=get_cat_prod.next_num)}}" class="btn btn-outline-info btn-sm mt-3">Cледующая</a>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+    <div class="row">
+
+        {% else %}
+        {% for product in products.items %}
+
+        <div class="col-md-3 mt-5">
+                <div class="product-grid">
+                    <div class="image">
+                        <img src="{{url_for('static', filename='images/' + product.image_1)}}" alt="{{product.name}}" class="w-100"
+                        width="200" >
+                        <a href="{{url_for('single_page', id=product.id)}}">
+                            <div class="overlay">
+                                <div class="detail">Описание</div>
+                            </div>
+                        </a>
+                    </div>
+                <div class="text-center mt-3">
+                    {% if product.discount > 0 %}
+                    <p>скидка {{ product.discount}} %</p>
+                    {% endif %}
+                    <h5 class="text-center">{{product.name}}</h5>
+                    <p class="text-center">Цена {{product.price}} ₴</p>
+                </div>
+                <form action="{{url_for('AddCart')}}" method="POST">
+                    <input type="hidden" name="product_id" value="{{product.id}}">
+                    <div class="flex">
+                    <button type="submit" class="btn btn-outline-primary" >В корзину</button>
+                    </div>
+                    <input type="hidden" name="quantity" id="" value="1">
+                </form>
+                </div>
+         </div>
+        {% endfor %}
+     </div>
+
+
+    <div class="row">
+        <div  class="col text-center ">
+            {% if products.has_prev %}
+            <a href="{{url_for('home', page=products.prev_num)}}" class="btn btn-outline-info btn-sm mt-3">Предыдущая</a>
+            {% endif %}
+            {% if products.total > 8  %}
+            {% for page_num in products.iter_pages(left_edge=1, right_edge=2, left_current=1, right_current=2) %}
+            {% if page_num %}
+            {% if products.page == page_num %}
+            <a href="{{url_for('home', page=page_num)}}" class="btn btn-info btn-sm mt-3">{{page_num}}</a>
+            {% else %}
+            <a href="{{url_for('home', page=page_num)}}" class="btn btn-outline-info btn-sm mt-3">{{page_num}}</a>
+            {% endif %}
+            {% else %}
+            ...
+            {% endif %}
+            {% endfor %}
+            {% endif %}
+            {% if products.has_next %}
+            <a href="{{url_for('home', page=products.next_num)}}" class="btn btn-outline-info btn-sm mt-3">Cледующая</a>
+            {% endif %}
+        </div>
+    </div>
+        {% endif %}
+    </div>
+
+{% endblock content %}
+

@@ -1,0 +1,78 @@
+{% extends 'layout.html' %}
+{% block content %}
+{% include 'navbar2.html' %}
+
+
+<div class="container">
+    <div class="row">
+            <div class="col-md-12">
+            <p><h2>Завершающая стадия оформления заказа</h2></p>
+            <form method="POST">
+                {{ form.csrf_token }}
+                <div class="form-group">
+                    <label for="email">Имя:</label>
+                    {{ form.name(class="form-control") }}
+                </div>
+                <div class="form-group">
+                    <label for="email">Телефон:</label>
+                    {{ form.telephone(class="form-control") }}
+                </div>
+
+                <div class="form-group">
+                    <label for="email">Отделение НП:</label><br>
+                    <select  class="selectpicker myselect"  data-live-search="true"  name="city">
+                        {% for warehouse in warehouses %}
+                        <option value="{{warehouse.id}}">{{ warehouse.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+
+
+
+
+
+
+
+                <button type="submit" class="btn btn-success btn-sm">Отправить!</button>
+            </form>
+            </div>
+    </div>
+</div>
+<script>
+
+
+city_select = document.getElementById('city.city');
+
+
+
+
+city_select.onchange = function() {
+    city = city_select.value;
+
+    fetch('warehouse/' + city).then(function(response){
+        response.json().then(function(data) {
+            optionHTML = '';
+            for (warehouse of data.warehousecity) {
+                optionHTML += '<option value="">'+ warehouse.title + '</option>'
+            }
+            warehouse_select.innerHTML = optionHTML;
+        });
+    });
+
+}
+
+
+(function ($) {
+
+    jQuery(document).ready(function($){
+        $('.myselect').selectpicker();
+    });
+
+    jQuery(window).load(function(){
+    });
+
+}(jQuery));
+
+</script>
+{% endblock content %}
