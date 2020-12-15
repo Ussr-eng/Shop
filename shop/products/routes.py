@@ -6,12 +6,12 @@ import secrets, os
 from shop.customers.models import CustomerOrderByOneClick
 
 
-
+# чтобы отфильтровать те бренды которые не использует ни один продукт
 def brands():
     brands = Brand.query.join(Addproduct, (Brand.id == Addproduct.brand_id)).all()
     return brands
 
-
+# чтобы отфильтровать те категории которые не использует ни один продукт
 def categories():
     categories = Category.query.join(Addproduct, (Category.id == Addproduct.category_id)).all()
     return categories
@@ -149,8 +149,6 @@ def addproduct():
     categories = Category.query.all()
     form = Addproducts(request.form)
     if request.method == "POST":
-        # brand = Brand.query.filter_by(name=request.form.get('brand')).first()
-        # category = Category.query.filter_by(name=request.form.get('category')).first()
         name = form.name.data
         price = form.price.data
         discount = form.discount.data
@@ -167,8 +165,8 @@ def addproduct():
         flash(f'The Product {name}, hes been added to your database', 'success')
         db.session.commit()
         return redirect(url_for('admin'))
-    return render_template('products/addproduct.html', form=form, title='Add Product page', brands=brands, categories=categories)
-
+    return render_template('products/addproduct.html', form=form, title='Add Product page', brands=brands,
+                           categories=categories)
 
 
 # ----------- page for update product!!! ----------- \

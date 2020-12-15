@@ -1,0 +1,49 @@
+{% extends 'layout.html' %}
+{% block content %}
+{% from '_formhelpers.html' import render_field %}
+{% include 'navbar2.html' %}
+{% include '_messages.html' %}
+<div class="container rounded bg-white mt-5">
+    <div class="row">
+        <div class="col-md-4 border-right">
+            {% if current_user.is_authenticated %}
+            <div class="d-flex flex-column align-items-center text-center p-3 py-5"><img class="rounded-circle mt-5" src="{{url_for('static', filename='images/avatar2.png')}}" width="200"><br>
+                <span class="font-weight-bold">{{current_user.firstName}}</span>
+            </div>
+            {% endif %}
+        </div>
+        <div class="col-md-8">
+            <div class="p-3 py-5">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+
+                    <h6 class="text-right">Личные данные</h6>
+                </div>
+                {{ form.csrf_token }}
+                <div class="row mt-2">
+                    <div class="col-md-6">{{render_field(form.first_name, class="form-control")}}</div>
+                    <div class="col-md-6">{{render_field(form.last_name, class="form-control")}}</div>
+                </div>
+                <div class="row mt-3">
+                    <div class="col-md-6">{{render_field(form.mobile, class="form-control")}}</div>
+                    {% if current_user.email == None %}
+                    <div class="col-md-6" >{{render_field(form.email, class="form-control", style="border: 2px solid #f30606")}}</div>
+                </div>
+                <div class="row mt-3">
+                    <div class="col-md-6">{{render_field(form.password, class="form-control", style="border: 2px solid #f30606")}}</div>
+                    <div class="col-md-6">{{render_field(form.confirm, class="form-control", style="border: 2px solid #f30606")}}</div>
+                </div>
+                    {% else %}
+                <div class="col-md-6" >{{render_field(form.email, class="form-control")}}</div>
+                </div>
+                <div class="row mt-3">
+                    <div class="col-md-6">{{render_field(form.password, class="form-control")}}</div>
+                    <div class="col-md-6">{{render_field(form.confirm, class="form-control")}}</div>
+                </div>
+                    {% endif %}
+            <br>
+                <button type="submit" class="btn btn-success ">Сохранить</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock content %}

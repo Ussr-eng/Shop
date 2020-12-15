@@ -42,6 +42,7 @@ class NPWarehouse(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(300))
+    order = db.relationship('CustomerOrder', backref=db.backref('warehouse', lazy=True))
 
 
 

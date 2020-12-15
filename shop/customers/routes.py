@@ -3,11 +3,13 @@ from shop.products.forms import Addproducts
 from shop import db, app, photos, bcrypt, login_manager, client
 from flask_login import login_required, current_user, logout_user, login_user
 from shop.products.models import Brand, Category, Addproduct
+from shop.products.routes import brands, categories
 import secrets, os
-from .forms import CustomerRegisterForm, CustomerLoginForm, OrderForm
+from .forms import CustomerRegisterForm, CustomerLoginForm, UserOrderForm
 from .models import Register, CustomerOrder, CustomerOrderByOneClick
-from shop.admin.models import  NPWarehouse
+from shop.admin.models import NPWarehouse
 from pprint import pprint
+
 
  # !!!!!!СТРАНИЦА РЕГИСТРАЦИИ!!!!!!
 @app.route('/customer/register', methods= ['GET', 'POST'])
@@ -16,7 +18,8 @@ def customer_register():
     if form.validate_on_submit():
         hash_password = bcrypt.generate_password_hash(form.password.data).decode('utf-8')
         register = Register(mobile=form.mobile.data, password=hash_password,
-                            FirstName=form.first_name.data, LastName=form.last_name.data)
+                            firstName=form.first_name.data, lastName=form.last_name.data,
+                            email=form.email.data)
         db.session.add(register)
         db.session.commit()
         flash(f'Добро пожаловать!', 'success')
@@ -30,8 +33,7 @@ def customer_register():
 def customerLogin():
     form = CustomerLoginForm()
     if form.validate_on_submit():
-        user = Register.query.filter_by(mobile=form.number.data).first()
-        print(user.password)
+        user = Register.query.filter_by(email=form.email.data).first()
         if user and bcrypt.check_password_hash(user.password, form.password.data):
             login_user(user)
             flash(f'Отлично!', 'success')
@@ -50,32 +52,110 @@ def customer_logout():
     return redirect(url_for('home'))
 
 
-# запись в бд данных о заказе
-@app.route('/getorder')
-@login_required
+# запись в бд данных о заказе(последняя стадия оформления заказа)
+@app.route('/getorder', methods=['GET', 'POST'])
 def get_order():
+    warehouses = NPWarehouse.query.all()
+    form = UserOrderForm()
+    # общая сумма заказа
+    subtotal = 0
+    for key, product in session['Shoppingcart'].items():
+        subtotal += float(product['price']) * int(product['quantity'])
+
     if current_user.is_authenticated:
         customer_id = current_user.id
-        invoice = secrets.token_hex(5)
-        try:
-            order = CustomerOrder(invoice=invoice, customer_id=customer_id,
-                                  orders=session['Shoppingcart'])
+        customer = Register.query.filter_by(id=customer_id).first()
+        form.first_name.data = customer.firstName
+        form.last_name.data = customer.lastName
+        form.mobile.data = customer.mobile
+        if request.method == 'POST' and form.validate_on_submit():
+            customer.firstName = form.first_name.data
+            customer.lastName = form.last_name.data
+            customer.mobile = form.mobile.data
+
+            description = form.description.data
+            callback = form.callback.data
+            warehouses_id = request.form.get('warehouse')
+            warehouse = NPWarehouse.query.filter_by(id=warehouses_id).first()
+
+            order = CustomerOrder(description=description, invoice=subtotal, callback=callback,
+                                  order=session['Shoppingcart'], owner=customer, warehouse=warehouse)
+
             db.session.add(order)
             db.session.commit()
             session.pop('Shoppingcart')
-            flash(f'Your order has been sent', 'success')
-            return redirect(url_for('orders', invoice=invoice))
-        except Exception as e:
-            print(e)
-            flash(f'Something wrong while get order', 'danger')
-            return redirect(url_for('getCart'))
+            return redirect(url_for('home'))
+    else:
+        if request.method == 'POST' and form.validate_on_submit():
+            # если пользователь незарегистрированный из предоставленой информиции мы его вносим в систему автоматически
+            first_name = form.first_name.data
+            last_name = form.last_name.data
+            mobile = form.mobile.data
+            customer = Register(firstName=first_name, lastName=last_name, mobile=mobile)
+
+            description = form.description.data
+            callback = form.callback.data
+            warehouses_id = request.form.get('warehouse')
+            warehouse = NPWarehouse.query.filter_by(id=warehouses_id).first()
+
+            order = CustomerOrder(description=description, invoice=subtotal, callback=callback,
+                                  order=session['Shoppingcart'], owner=customer, warehouse=warehouse)
+
+            db.session.add(customer)
+            db.session.add(order)
+            db.session.commit()
+            login_user(customer)
+            session.pop('Shoppingcart')
+            flash(f'Спасибо за заказ, ваша заявка обрабатывается! Также вы можете завершить процесс регистрации'
+                  f' для этого нажмите кнопку "Профиль"',
+                  'success')
+
+            return redirect(url_for('home'))
+    return render_template('customer/mainorder.html', form=form, warehouses=warehouses, brands=brands(),
+                           categories=categories())
+
+
+@app.route('/customer/profile', methods=['GET', 'POST'])
+@login_required
+def profile():
+
+    form = CustomerRegisterForm()
+    customer_id = current_user.id
+    customer = Register.query.filter_by(id=customer_id).first()
+    # if request.method == 'POST' and form.validate_on_submit():
+    return render_template('customer/profile.html', form=form, brands=brands(), categories=categories())
+
+
+@app.route('/customer/person_data', methods=['GET', 'POST'])
+@login_required
+def person_data():
+    # изменение личных данных
+    form = CustomerRegisterForm()
+    customer_id = current_user.id
+    customer = Register.query.filter_by(id=customer_id).first()
+    form.first_name.data = customer.firstName
+    form.last_name.data = customer.lastName
+    form.mobile.data = customer.mobile
+    form.email.data = customer.email
+    if request.method == 'POST' and form.validate_on_submit():
+        hash_password = bcrypt.generate_password_hash(form.password.data).decode('utf-8')
+        customer.firstName = form.first_name.data
+        customer.lastName = form.last_name.data
+        customer.mobile = form.mobile.data
+        customer.email = form.email.data
+        customer.password = hash_password
+
+        db.session.commit()
+        flash(f'Вы успешно зарегистрировались!', 'success')
+        return redirect(url_for('home'))
+    return render_template('customer/person_data.html', form=form, brands=brands(), categories=categories())
 
 
 # Из БД достает информацию о заказк
 @app.route('/orders/<invoice>')
 @login_required
 def orders(invoice):
-    if   current_user.is_authenticated:
+    if current_user.is_authenticated:
         grandTotal = 0
         subTotal = 0
         customer_id = current_user.id
@@ -111,14 +191,6 @@ def orderoneclick(id):
     return render_template(url_for('home'))
 
 
-@app.route('/mainorders')
-def mainorders():
-    form = OrderForm()
-    warehouses = NPWarehouse.query.all()
-
-    return render_template('customer/mainorder.html', form=form, warehouses=warehouses)
-
-
 @app.route('/warehouse/<get_warehouse>')
 def citybyregion(get_warehouse):
     warehouses = NPWarehouse.query.filter_by(city_id=get_warehouse).all()
@@ -139,7 +211,6 @@ def novaposhta():
         title_json = warehouses['DescriptionRu']
         name_json =city_json +", "+ title_json
         warehouse = NPWarehouse(name = name_json)
-
 
         db.session.add(warehouse)
         db.session.commit()
@@ -177,7 +248,3 @@ def novaposhta():
 #
 #
 #     print('Victory')
-
-
-
-

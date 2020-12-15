@@ -2,9 +2,7 @@ from flask import  redirect, render_template, url_for, flash, request, session, 
 from shop import db, app
 from shop.products.models import Addproduct, Brand, Category
 from shop.products.routes import brands, categories
-
 import simplejson
-
 
 # если товаров > 1
 def MagerDicts(dict1, dict2):
@@ -13,6 +11,7 @@ def MagerDicts(dict1, dict2):
     elif isinstance(dict1, dict) and isinstance(dict2, dict):
         return dict(list(dict1.items()) + list(dict2.items()))
     return False
+
 
 # добавления товара в корзину
 @app.route('/addcart', methods=['POST'])
@@ -37,7 +36,6 @@ def AddCart():
                 else:
                     session['Shoppingcart'] = MagerDicts(session['Shoppingcart'], DictItems)
                     redirect(request.referrer)
-
             else:
                 session ['Shoppingcart'] = DictItems
                 return redirect(request.referrer)
@@ -46,7 +44,6 @@ def AddCart():
         print(e)
     finally:
         return redirect(request.referrer)
-
 
 
 # цифры в корзине
@@ -62,7 +59,7 @@ def getCart():
         subtotal -= discount
         tax = ("%0.2f" % (.06 * float(subtotal)))
         grandtotal = float("%0.2f" % (1 * subtotal))
-    return render_template('products/carts.html', grandtotal=grandtotal, brands=brands(), categories=categories())
+    return render_template('customer/carts.html', grandtotal=grandtotal, brands=brands(), categories=categories())
 
 
 # обновление количества товаров если их > 1
@@ -86,7 +83,7 @@ def updatecart(code):
     return
 
 
-# чтобы очистить корзину для Admina
+# чтобы очистить корзину для Admin
 @app.route('/empty')
 def empty_cart():
     try:

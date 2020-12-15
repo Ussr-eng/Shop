@@ -11,18 +11,16 @@ def user_loader(user_id):
 
 class Register(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key=True)
-    FirstName = db.Column(db.String(50), nullable=True)
-    LastName =  db.Column(db.String(50), nullable=True)
-    mobile = db.Column(db.String(15), unique=True, nullable=True)
-    password = db.Column(db.String(202), unique= False, nullable=False)
+    firstName = db.Column(db.String(50), nullable=True)
+    lastName = db.Column(db.String(50), nullable=True)
+    mobile = db.Column(db.String(15), nullable=True)
+    email = db.Column(db.String(50), unique=True, nullable=True)
+    password = db.Column(db.String(202), unique=False, nullable=True)
     date_created = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
-
+    order = db.relationship('CustomerOrder', backref=db.backref('owner', lazy=True))
 
     def __repr__(self):
-        return '<Register %r>' % self.mobile
-
-
-
+        return '<Register %r>' % self.email
 
 
 class JsonEcodedDict(db.TypeDecorator):
@@ -41,19 +39,18 @@ class JsonEcodedDict(db.TypeDecorator):
             return json.loads(value)
 
 
-
 class CustomerOrder(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    invoice = db.Column(db.String(20), unique=True, nullable=False)
-    status = db.Column(db.String(20), default='Pending', nullable=False)
-    customer_id = db.Column(db.Integer, unique=False, nullable=False)
+    customer_id = db.Column(db.Integer, db.ForeignKey('register.id'), nullable=False)
+    warehouses_id = db.Column(db.Integer, db.ForeignKey('np_warehouses.id'), nullable=False)
+    description = db.Column(db.String(100), nullable=True)
+    invoice = db.Column(db.String(50), nullable=True)
+    callback = db.Column(db.String(50), nullable=True)
+    order = db.Column(JsonEcodedDict)
     date_created = db.Column(db.DateTime(20), default=datetime.utcnow, nullable=False)
-    orders = db.Column(JsonEcodedDict)
-
 
     def __repr__(self):
         return '<customerOrder %r>' % self.invoice
-
 
 
 class CustomerOrderByOneClick(db.Model):
@@ -61,10 +58,9 @@ class CustomerOrderByOneClick(db.Model):
     name = db.Column(db.String(15), unique=False)
     number = db.Column(db.String(15), unique=False)
     product_name = db.Column(db.String(30), unique=False)
-    product_price = db.Column(db.Numeric(10,2), nullable=False)
+    product_price = db.Column(db.Numeric(10, 2), nullable=False)
     product_discount = db.Column(db.String(30), unique=False)
     date_created = db.Column(db.DateTime, nullable=False, default=datetime.now)
-
 
 
 db.create_all()

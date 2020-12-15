@@ -1,43 +1,50 @@
 {% extends 'layout.html' %}
 {% block content %}
 {% include 'navbar2.html' %}
-
+{% include '_messages.html' %}
 
 <div class="container">
-    <div class="row">
-            <div class="col-md-12">
-            <p><h2>Завершающая стадия оформления заказа</h2></p>
+    <div class="col-md-2"></div>
+    <div class="col-md-12">
+            <h2 class="text-center bg-info p-2">Завершающая стадия оформления заказа</h2>
+            {% from "_formhelpers.html" import render_field %}
             <form method="POST">
-                {{ form.csrf_token }}
-                <div class="form-group">
-                    <label for="email">Имя:</label>
-                    {{ form.name(class="form-control") }}
-                </div>
-                <div class="form-group">
-                    <label for="email">Телефон:</label>
-                    {{ form.telephone(class="form-control") }}
-                </div>
-
-                <div class="form-group">
-                    <label for="email">Отделение НП:</label><br>
-                    <select  class="selectpicker myselect"  data-live-search="true"  name="city">
-                        {% for warehouse in warehouses %}
-                        <option value="{{warehouse.id}}">{{ warehouse.name }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
+            {{ form.csrf_token }}
 
 
+            {{ render_field(form.first_name , class="form-control", placeholder="Ваше имя") }}
+            {{ render_field(form.last_name , class="form-control", placeholder="Ваша фамилия") }}
+            {{ render_field(form.mobile, class="form-control", placeholder="Номер телефона") }}
+            <br>
+            <label for="warehouse">Отделение НП:</label><br>
+            <select  class="selectpicker myselect"  data-live-search="true"  name="warehouse" required>
+                {% for warehouse in warehouses %}
+                <option value="{{warehouse.id}}">{{ warehouse.name }}</option>
+                {% endfor %}
+            </select>
 
+            <br>
+            <br>
+            <div class="dropdown">
 
-
+            {{ render_field(form.callback, class="dropdown-item") }}
+            </div>
+            <br>
 
 
 
-                <button type="submit" class="btn btn-success btn-sm">Отправить!</button>
+
+
+
+            {{ render_field(form.description, class="form-control", placeholder="Можете добавить комментарий",
+            rows="6") }}
+
+            <br>
+            <button type="submit" class="btn btn-success ">Оформить заказ!</button>
             </form>
             </div>
-    </div>
+
+    <div class="col-md-2"></div>
 </div>
 <script>
 

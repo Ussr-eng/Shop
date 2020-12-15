@@ -74,3 +74,4 @@ def login():
             flash('Wrong Password please try again', 'danger')
 
     return render_template('admin/login.html', form=form, title="Login Page")
+

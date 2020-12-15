@@ -16,16 +16,17 @@
         {{ form.csrf_token }}
         <div class="row">
             <div class="col-md-2"></div>
-            <div class="col-md-4">
+            <div class="col-md">
                 {{render_field(form.first_name, class="form-control")}}
                 {{render_field(form.last_name, class="form-control")}}
                 {{render_field(form.mobile, class="form-control")}}
+                {{render_field(form.email, class="form-control")}}
                 {{render_field(form.password, class="form-control")}}
                 {{render_field(form.confirm, class="form-control")}}
-                {{form.submit(class="btn btn-sm btn-info float-right")}}
+                <br>
+                <button type="submit" class="btn btn-success ">Регистрация</button>
             </div>
-            <div class="col-md-4">
-             </div>
+
             <div class="col-md-2"></div>
         </div>
     </form>
